@@ -266,9 +266,15 @@ func TestEventBus(t *testing.T) {
 	})
 
 	ensure.Run("concurrent subscriptions, publishing, and unsubscriptions", func(ensure ensurepkg.Ensure) {
+		// This test is largely designed to help surface any race condition issues, thus the results are not checked
+
 		bus := eventbus.New[*MyEvent]()
 
-		{
+		// Thoroughly exercise the concurrent code
+		const numParallel = 1000
+
+		// Make sure the subscription and unsubscription can happen in separate goroutines
+		for i := 0; i < numParallel; i++ {
 			var (
 				sub *eventbus.Subscription[*MyEvent]
 				mu  sync.Mutex
@@ -287,41 +293,53 @@ func TestEventBus(t *testing.T) {
 			}()
 		}
 
-		go func() {
-			bus.Publish(&MyEvent{ID: "1"}, "key1")
-		}()
+		for i := 0; i < numParallel; i++ {
+			go func() {
+				bus.Publish(&MyEvent{ID: "1"}, "key1")
+			}()
+		}
 
-		go func() {
-			bus.Subscribe("key1").Unsubscribe()
-		}()
+		for i := 0; i < numParallel; i++ {
+			go func() {
+				bus.Subscribe("key1").Unsubscribe()
+			}()
+		}
 
-		go func() {
-			bus.Subscribe("key2").Unsubscribe()
-		}()
+		for i := 0; i < numParallel; i++ {
+			go func() {
+				bus.Subscribe("key2").Unsubscribe()
+			}()
+		}
 
-		go func() {
-			bus.Publish(&MyEvent{ID: "2"}, "key2")
-		}()
+		for i := 0; i < numParallel; i++ {
+			go func() {
+				bus.Publish(&MyEvent{ID: "2"}, "key2")
+			}()
+		}
 
-		go func() {
-			bus.Subscribe("key1").Unsubscribe()
-		}()
+		for i := 0; i < numParallel; i++ {
+			go func() {
+				bus.Publish(&MyEvent{ID: "3"}, "key1")
+			}()
+		}
 
-		go func() {
-			bus.Subscribe("key1").Unsubscribe()
-		}()
+		for i := 0; i < numParallel; i++ {
+			go func() {
+				bus.Subscribe("key3").Unsubscribe()
+			}()
+		}
 
-		go func() {
-			bus.Publish(&MyEvent{ID: "3"}, "key1")
-		}()
+		for i := 0; i < numParallel; i++ {
+			go func() {
+				bus.Publish(&MyEvent{ID: "4"}, "key2")
+			}()
+		}
 
-		go func() {
-			bus.Publish(&MyEvent{ID: "4"}, "key2")
-		}()
-
-		go func() {
-			bus.Publish(&MyEvent{ID: "5"}, "key1")
-		}()
+		for i := 0; i < numParallel; i++ {
+			go func() {
+				bus.Publish(&MyEvent{ID: "5"}, "key1")
+			}()
+		}
 	})
 }
 
