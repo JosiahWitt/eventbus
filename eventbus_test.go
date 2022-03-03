@@ -114,6 +114,18 @@ func TestEventBus(t *testing.T) {
 		ensure(buf2.events()).Equals([]*MyEvent{{ID: "123"}, {ID: "456"}})
 	})
 
+	ensure.Run("only receives event once when the same event is published to duplicate topics", func(ensure ensurepkg.Ensure) {
+		bus := eventbus.New[*MyEvent]()
+
+		sub1 := bus.Subscribe("key1")
+		buf1 := bufferSubscription(sub1, 2)
+
+		bus.Publish(&MyEvent{ID: "123"}, "key1", "key2", "key1")
+		bus.Publish(&MyEvent{ID: "456"}, "key1", "key2", "key1")
+
+		ensure(buf1.events()).Equals([]*MyEvent{{ID: "123"}, {ID: "456"}})
+	})
+
 	ensure.Run("when subscribed to multiple topics", func(ensure ensurepkg.Ensure) {
 		bus := eventbus.New[*MyEvent]()
 
