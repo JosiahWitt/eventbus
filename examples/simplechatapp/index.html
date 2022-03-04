@@ -1,0 +1,145 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Chat App</title>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <script>
+    const hashtagRegexp = /#[a-z\d-]+/g
+    const apiPrefix = "http://localhost:1234/api"
+
+    function sendMessage(msg) {
+      fetch(apiPrefix + "/send-message", {
+        method: "PUT",
+        body: JSON.stringify(msg),
+      })
+    }
+
+    function subscribe(hashtags) {
+      return new EventSource(apiPrefix + "/message-stream?hashtags=" + hashtags.join(","))
+    }
+  </script>
+
+  <style>
+    label {
+      display: block;
+      padding-bottom: 1em;
+    }
+
+    textarea {
+      display: block;
+      width: 25em;
+      height: 10em;
+    }
+
+    .messages {
+      overflow: scroll;
+    }
+
+    .message {
+      border: 1px black solid;
+      padding: 0.2em;
+      margin-bottom: 0.5em;
+    }
+
+    .message p,
+    .message pre {
+      margin: 0.2em;
+    }
+  </style>
+</head>
+
+<body>
+  <div x-data="{
+    name: 'Bob',
+    message: 'Hello, World! #testing #123',
+
+    lastID: '(no messages sent yet)',
+
+    send() {
+      const rawHashtags = this.message.match(hashtagRegexp)
+      const hashtags = rawHashtags?.map(h => h.slice(1))
+
+      const id = Math.random().toString(36).substring(2, 8)
+
+      sendMessage({ id: id, username: this.name, body: this.message, hashtags: hashtags })
+
+      this.lastID = id
+    },
+  }">
+    <form @submit.prevent="send">
+      <label>
+        Name:
+        <input type="text" x-model="name">
+      </label>
+
+      <label>
+        Message:
+        <textarea x-model="message"></textarea>
+      </label>
+
+      <button>Send</button>
+
+      <p>
+        Last Sent Message ID: <span x-text="lastID"></span>
+      </p>
+
+      <p>
+        Note: If you are not subscribed to at least one of the hashtags in the message you send, you won't see it below.
+        Despite how quick it is, the top and bottom of this page function independently.
+      </p>
+    </form>
+  </div>
+
+  <hr>
+
+  <div x-init="sub" x-data="{
+    rawHashtags: 'testing,123',
+    hashtags: [],
+
+    messages: [],
+
+    subscription: null,
+
+    sub() {
+      if (this.subscription) {
+        this.subscription.close()
+      }
+
+      this.hashtags = this.rawHashtags.split(',')?.map(h => h.trim())
+      this.subscription = subscribe(this.hashtags)
+
+      this.subscription.onmessage = (e) => {
+        const msg = JSON.parse(e.data)
+        this.messages.unshift(msg)
+      }
+    },
+  }">
+    <form @submit.prevent="sub">
+      Hashtags:
+      <input type="text" x-model="rawHashtags">
+      <button>Subscribe</button>
+    </form>
+
+    <p>
+      Subscribed to hashtags: #<span x-text="hashtags.join(', #')"></span>
+    </p>
+
+    <div class="messages">
+      <template x-for="message in messages" :key="message.id">
+        <div class="message">
+          <p><b>ID</b>: <span x-text="message.id"></span></p>
+          <p><b>Name</b>: <span x-text="message.username"></span></p>
+          <p><b>Message</b>:
+          <pre x-text="message.body"></pre>
+          </p>
+        </div>
+      </template>
+    </div>
+  </div>
+</body>
+
+</html>

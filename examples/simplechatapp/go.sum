@@ -1,0 +1,9 @@
+github.com/JosiahWitt/ensure v0.3.10 h1:C8XWrrn7JEJsHsCI6RhISnim1L5eVvzKZ1DMXOP0Cho=
+github.com/JosiahWitt/erk v0.5.8 h1:k1EjYn+0oKgMxd/tzVlF1uIfJtVUeqUmZdomRIOm5EI=
+github.com/JosiahWitt/eventbus v0.1.0 h1:9W5Bumg2Ac4PGQmZhQEkHkG6crBFvL1+DTgFShNl0xw=
+github.com/JosiahWitt/eventbus v0.1.0/go.mod h1:S+DtWqCNKPkokUOMpc9nB0LSu/cM6hURBIe8x1VQ0QU=
+github.com/go-test/deep v1.0.7 h1:/VSMRlnY/JSyqxQUzQLKVMAskpY/NZKFA5j2P+0pP2M=
+github.com/golang/mock v1.5.0 h1:jlYHihg//f7RRwuPfptm04yp4s7O6Kw8EZiVYIGcH0g=
+github.com/kr/pretty v0.2.2-0.20201124222238-a883a8422cd2 h1:7T0c++AuIcbJRHkrFXWsH+Nd7ewdE9gxLxGxi/XuJ4w=
+github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
+github.com/rogpeppe/go-internal v1.6.1 h1:/FiVV8dS/e+YqF2JvO3yXRFbBLTIuSDkuC7aBOAvL+k=
