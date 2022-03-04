@@ -7,3 +7,6 @@
    $ go run main.go
    ```
 3. Open [localhost:1234](http://localhost:1234) in at least two browser windows
+
+## Demo
+![](./demo.gif)
